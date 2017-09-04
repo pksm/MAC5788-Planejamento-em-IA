@@ -18,6 +18,12 @@ class blindSearch(object):
 		self._domain = domain
 		self._problem = problem
 		self._search = search
+		#self._objects[obj.type] = self._objects.get(obj.type, [])
+		self.domainOperators = {}
+		for i in self.domain.operators:
+			self.domainOperators[i.name] = []
+			for j in i.precond:
+				self.domainOperators[i.name].append(str(j))
 
 	@property
 	def domain(self):
@@ -31,6 +37,10 @@ class blindSearch(object):
 	def search(self):
 		return self._search
 
+	# @property
+	# def domainOperators(self):
+	# 	return self._domainOperators.copy()
+
 	def getInit(self):
 		return self.problem._init #return a set with the initial propositions
 
@@ -42,6 +52,9 @@ class blindSearch(object):
 		validActions = []
 		all_actions = self.domain.operators
 		literals = self.problem.objects
+		types = list(literals.keys()) #pode ser alterado para set
+		print(self.domainOperators)
+
 		#for s in state:
 
 
@@ -49,4 +62,4 @@ class blindSearch(object):
 			if ((set(a.precond) & state) == set(a.precond)):
 				validActions.append(a.name)
 
-		return validActions
+		return 
