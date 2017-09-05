@@ -10,6 +10,7 @@ Criar arquivo de teste, exemplos de teste:
 - teste da função getInit com uma comparação com o que foi imputado no pddl
 - teste da função isGoal com a meta do problema e uma entrada manual da entrada da meta
 '''
+import re
 
 class blindSearch(object):
 	"""docstring for blindSearch"""
@@ -19,11 +20,11 @@ class blindSearch(object):
 		self._problem = problem
 		self._search = search
 		#self._objects[obj.type] = self._objects.get(obj.type, [])
-		self.domainOperators = {}
-		for i in self.domain.operators:
-			self.domainOperators[i.name] = []
-			for j in i.precond:
-				self.domainOperators[i.name].append(str(j))
+		# self.domainOperators = {}
+		# for i in self.domain.operators:
+		# 	self.domainOperators[i.name] = []
+		# 	for j in i.precond:
+		# 		self.domainOperators[i.name].append(str(j))
 
 	@property
 	def domain(self):
@@ -53,9 +54,19 @@ class blindSearch(object):
 		all_actions = self.domain.operators
 		literals = self.problem.objects
 		types = list(literals.keys()) #pode ser alterado para set
-		print(self.domainOperators)
+		precondAct = []
 
-		#for s in state:
+		for i in range(len(all_actions)):
+			#precondAct.append()
+			# print (all_actions[i].name)
+			# print (all_actions[i].params[0].type)
+'''
+Ideia:
+	criar dois dicts: (1) dict predicate (2) dict equality (pode ser um set com o nome das actions que contenham tipo equality na precond)
+		(1) [action.name] = action.precond.predicate.name
+'''
+			for j in range(len(all_actions[i].precond)):
+				print (all_actions[i].precond[j].predicate.name)
 
 
 		for a in all_actions:
@@ -63,3 +74,5 @@ class blindSearch(object):
 				validActions.append(a.name)
 
 		return 
+
+
