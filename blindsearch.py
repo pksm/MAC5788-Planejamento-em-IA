@@ -55,16 +55,16 @@ class blindSearch(object):
 		literals = self.problem.objects
 		types = list(literals.keys()) #pode ser alterado para set
 		precondAct = []
+		'''
+		Ideia:
+			criar dois dicts: (1) dict predicate (2) dict equality (pode ser um set com o nome das actions que contenham tipo equality na precond)
+			(1) [action.name] = action.precond.predicate.name
 
+		'''
 		for i in range(len(all_actions)):
 			#precondAct.append()
 			# print (all_actions[i].name)
 			# print (all_actions[i].params[0].type)
-'''
-Ideia:
-	criar dois dicts: (1) dict predicate (2) dict equality (pode ser um set com o nome das actions que contenham tipo equality na precond)
-		(1) [action.name] = action.precond.predicate.name
-'''
 			for j in range(len(all_actions[i].precond)):
 				print (all_actions[i].precond[j].predicate.name)
 
