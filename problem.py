@@ -21,9 +21,9 @@ class Problem(object):
     def __init__(self, name, domain, objects, init, goal):
         self._name = name
         self._domain = domain
-        self._objects = {}
+        self._objects = {} # dictionary
         for obj in objects:
-            self._objects[obj.type] = self._objects.get(obj.type, []) #vejo se a chaveja existe, se nao existir retorno uma lista vazia
+            self._objects[obj.type] = self._objects.get(obj.type, []) #vejo se a chave ja existe, se nao existir retorno uma lista vazia
             self._objects[obj.type].append(str(obj.value)) #append de uma string com o valor do objeto
         self._init = set(map(str, init))
         self._goal = set(map(str, goal))
