@@ -11,6 +11,7 @@ Criar arquivo de teste, exemplos de teste:
 - teste da função isGoal com a meta do problema e uma entrada manual da entrada da meta
 '''
 import re
+from copy import deepcopy
 
 class blindSearch(object):
 	"""docstring for blindSearch"""
@@ -61,18 +62,30 @@ class blindSearch(object):
 		return ((self.problem.goal & state) == self.problem.goal) #goal test
 		#before last update: return ((self.problem._goal & state) == self.problem._goal)
 
-	def grounding(self, actions, literals,types): ??
+	def grounding(self, actions): 
+		literals = self.problem.objects #dict key -> type   values -> literals
+		actToGround = set()
+		for a in actions:
+			params = deepcopy(a.params)
+			var = [i.name for i in params]
+			typ = [i.type for i in params]
+			print ("HEYY", a.name, type(params),params[len(params)-1].name, params[len(params)-1].type, len(params), var, typ)
+
+
+		print ("Literals Problem > ", literals) 
+		#print precond grounded
 
 
 	def applicableActions(self,state): #esperando um state do tipo set
 		validActions = set()
 		all_actions = self.domain.operators
-		literals = self.problem.objects
 		atomState = {re.sub(r'\([^)]*\)', '', str(i)) for i in self.problem.init} #sera state depois
 		for i in self.operatorsPrecond.keys():
 			if ((self.operatorsPrecond[i] & atomState) == self.operatorsPrecond[i]):
-				validActions.add(i.name)
+				validActions.add(i)
 		print ("VALID FOR > ", self.problem.init, "ACTIONS > ", validActions )
+		self.grounding(all_actions)
+		# self.grounding(validActions)
 
 
 
@@ -99,9 +112,9 @@ class blindSearch(object):
 				[action.name] = [action.precond (sem os predicados de igualdade)]	DICT referente a DOMAIN
 
 		'''
-		for a in all_actions:
-			if ((set(a.precond) & state) == set(a.precond)):
-				validActions.append(a.name)
+		# for a in all_actions:
+		# 	if ((set(a.precond) & state) == set(a.precond)):
+		# 		validActions.append(a.name)
 
 		return 
 
