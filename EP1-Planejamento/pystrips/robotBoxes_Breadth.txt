@@ -1,0 +1,55 @@
+
+'Solving pddl/robot/boxes/problem01.pddl ...'
+
+[pickup(box1, left, room1), move(room1, room2), putdown(box1, left, room2)]
+>> solution length = 3
+>> time: parsing = 0.0000, grounding = 0.0000, planning = 0.0000
+>> nodes explored = 7
+>> nodes visited  = 12
+>> ramification factor = 1.7143
+
+
+'Solving pddl/robot/boxes/problem02.pddl ...'
+
+[pickup(box1, left, room1), pickup(box2, right, room1), move(room1, room2), putdown(box1, left, room2), putdown(box2, right, room2)]
+>> solution length = 5
+>> time: parsing = 0.0000, grounding = 0.0000, planning = 0.0000
+>> nodes explored = 38
+>> nodes visited  = 104
+>> ramification factor = 2.7368
+
+
+'Solving pddl/robot/boxes/problem03.pddl ...'
+
+[pickup(box1, left, room1), move(room1, room2), putdown(box1, left, room2), move(room2, room1), pickup(box2, left, room1), pickup(box3, right, room1), move(room1, room2), putdown(box2, left, room2), putdown(box3, right, room2)]
+>> solution length = 9
+>> time: parsing = 0.0000, grounding = 0.0000, planning = 0.0469
+>> nodes explored = 459
+>> nodes visited  = 1532
+>> ramification factor = 3.3377
+
+
+'Solving pddl/robot/boxes/problem04.pddl ...'
+
+[pickup(box1, left, room1), pickup(box2, right, room1), move(room1, room2), putdown(box1, left, room2), putdown(box2, right, room2), move(room2, room1), pickup(box3, left, room1), pickup(box4, right, room1), move(room1, room2), putdown(box3, left, room2), putdown(box4, right, room2)]
+>> solution length = 11
+>> time: parsing = 0.0156, grounding = 0.0000, planning = 0.7344
+>> nodes explored = 3454
+>> nodes visited  = 14280
+>> ramification factor = 4.1343
+
+
+'Solving pddl/robot/boxes/problem05.pddl ...'
+
+[pickup(box1, left, room1), move(room1, room2), putdown(box1, left, room2), move(room2, room1), pickup(box2, left, room1), pickup(box3, right, room1), move(room1, room2), putdown(box2, left, room2), putdown(box3, right, room2), move(room2, room1), pickup(box4, left, room1), pickup(box5, right, room1), move(room1, room2), putdown(box4, left, room2), putdown(box5, right, room2)]
+>> solution length = 15
+>> time: parsing = 0.0156, grounding = 0.0000, planning = 116.0081
+>> nodes explored = 60043
+>> nodes visited  = 260692
+>> ramification factor = 4.3418
+
+
+'Solving pddl/robot/boxes/problem06.pddl ...'
+
+Deseja finalizar o arquivo em lotes (S/N)? 
+Deseja finalizar o arquivo em lotes (S/N)? Deseja finalizar o arquivo em lotes (S/N)? 

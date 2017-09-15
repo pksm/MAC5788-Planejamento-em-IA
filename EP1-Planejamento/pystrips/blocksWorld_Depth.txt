@@ -1,0 +1,18 @@
+
+'Solving blocksworld/problems/probBLOCKS-04-0.pddl ...'
+
+>> solution length = 34
+>> time: parsing = 0.0030, grounding = 0.0015, planning = 0.0055
+>> nodes explored = 74
+>> nodes visited  = 167
+>> ramification factor = 2.2568
+
+
+'Solving blocksworld/problems/probBLOCKS-04-2.pddl ...'
+
+>> solution length = 20
+>> time: parsing = 0.0030, grounding = 0.0015, planning = 0.0030
+>> nodes explored = 39
+>> nodes visited  = 91
+>> ramification factor = 2.3333
+
