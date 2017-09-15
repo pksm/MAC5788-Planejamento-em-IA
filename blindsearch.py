@@ -12,6 +12,25 @@ Criar arquivo de teste, exemplos de teste:
 '''
 import re
 from copy import deepcopy
+from itertools import product
+
+
+def generate(typ,lit): #lit eh um dict (literals) --- retorna todas as subst possiveis para uma acao
+	combList = []
+	if (len(typ)==1):
+		return lit[typ[0]]  
+	for t in typ:
+		combList.append(lit[t])
+	allComb = list(product(*combList))
+	return allComb
+
+def subst(comb,act): #comb is a list 
+	for index in range(len(act.params)):
+		act.params[index]._value = comb[index]
+	print(act.params[0])
+		
+
+
 
 class blindSearch(object):
 	"""docstring for blindSearch"""
@@ -62,18 +81,117 @@ class blindSearch(object):
 		return ((self.problem.goal & state) == self.problem.goal) #goal test
 		#before last update: return ((self.problem._goal & state) == self.problem._goal)
 
-	def grounding(self, actions): 
+	def grounding(self, actions, state): #returns list of instatiated applicable actions
 		literals = self.problem.objects #dict key -> type   values -> literals
 		actToGround = set()
 		for a in actions:
+			tempAction = deepcopy(a)
 			params = deepcopy(a.params)
 			var = [i.name for i in params]
 			typ = [i.type for i in params]
-			print ("HEYY", a.name, type(params),params[len(params)-1].name, params[len(params)-1].type, len(params), var, typ)
+			#print ("HEYY", a.name, type(params),params[len(params)-1].name, params[len(params)-1].type, len(params), var, typ)
+			#print(self.gen_all_combinations(['block', 'girafa'],{'block' : ['d', 'b', 'a', 'c'], 'girafa' : ['mimosa', 'gigi']}))
+			combAll = generate(typ,literals)
+			print("possible combinations for ", a.name, combAll)
+			#subst(list(combAll), deepcopy(a),var)
+			for i in combAll:
+			 	tempAction = subst(list(i), deepcopy(a))
+			 	actToGround.add(tempAction)
 
+
+			#actToGround.add(Action(a.name, [j.replace() for j in params]))
+			#for p in a.precond:
+			# for p in params: #parametros da action a ... ?x - block, ?y - block
+			# 	for i in a.preconds: #iterar e substituir todas as preconds de a
+			# 		actInstPrecond.add(i.replace(p,j) for j in literals[p.type])
 
 		print ("Literals Problem > ", literals) 
-		#print precond grounded
+
+
+
+
+
+
+
+
+
+	def gen_all_combinations(self,headers_types ,objects):
+
+
+		def tam_instances(vector_param_len):
+
+			final_tam = 1
+			for tam in vector_param_len:
+				final_tam = final_tam*tam
+			
+			return final_tam
+
+
+		#print("init function")
+
+		vector_freq = []
+
+		instances_values = []
+
+		index = []
+
+		num_values = []
+		keys = {}
+
+		i=0
+		for tp in headers_types:
+
+
+			num_values.append(len(objects[tp]))
+			index.append(0)
+			keys[i] = tp
+			i = i+1
+
+
+			#print(tp)
+		#print(num_values)
+		#print(len(num_values))
+		for i in range(1,len(num_values)):
+
+			n = num_values[i]
+			for j in range(i+1, len(num_values)):
+				n = n*num_values[j]
+
+			vector_freq.append(n)
+
+			#print('here',i)
+
+		vector_freq.append(1)
+
+		#print(vector_freq)
+		#print(index)
+
+		full_tam = tam_instances(num_values)
+		#print(full_tam)
+
+		for i in range(full_tam):
+
+			posb = [None]*len(vector_freq)
+
+			for j in range(len(vector_freq)):
+				
+
+				posb[j] = objects[keys[j]][index[j]]
+
+				if (i+1)%vector_freq[j] == 0:
+					index[j] = (index[j]+1)%num_values[j]
+
+
+			instances_values.append(posb)
+
+
+
+
+		#print("end function")
+		return instances_values
+
+
+
 
 
 	def applicableActions(self,state): #esperando um state do tipo set
@@ -84,10 +202,9 @@ class blindSearch(object):
 			if ((self.operatorsPrecond[i] & atomState) == self.operatorsPrecond[i]):
 				validActions.add(i)
 		print ("VALID FOR > ", self.problem.init, "ACTIONS > ", validActions )
-		self.grounding(all_actions)
-		# self.grounding(validActions)
-
-
+		self.grounding(all_actions, self.problem.init)
+		#actInst = self.grounding(all_actions, self.problem.init) # self.grounding(validActions, state) in the future
+		#generate successor state for each actInst
 
 
 
