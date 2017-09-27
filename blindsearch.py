@@ -24,10 +24,19 @@ def generate(typ,lit): #lit eh um dict (literals) --- retorna todas as subst pos
 	allComb = list(product(*combList))
 	return allComb
 
-def subst(comb,act): #comb is a list 
-	for i in range(len(act.params)):
-		act.params[i]._value = comb[i]
-	return act
+def subst(comb,act): 
+	pos = 0
+	instAct = deepcopy(act)
+	for valor in comb:
+		act._params[pos]._value = valor
+		instAct._params[pos]._value = valor
+		pos += 1
+	for pre in range(len(act._precond)):
+		instAct._precond[pre]._predicate = act._precond[pre]._predicate.ground(act._params)
+
+	for eff in range(len(act._effects)):
+		instAct._effects[eff]._predicate = act._effects[eff]._predicate.ground(act._params)
+	return instAct
 		
 
 
@@ -92,17 +101,31 @@ class blindSearch(object):
 			#print ("HEYY", a.name, type(params),params[len(params)-1].name, params[len(params)-1].type, len(params), var, typ)
 			#print(self.gen_all_combinations(['block', 'girafa'],{'block' : ['d', 'b', 'a', 'c'], 'girafa' : ['mimosa', 'gigi']}))
 			combAll = generate(typ,literals)
-			#print("possible combinations for ", a.name, combAll)
+			print("possible combinations for ", a.name, combAll)
 			#subst(list(combAll), deepcopy(a),var)
 			for i in combAll:
-			 	tempAction = subst(list(i), deepcopy(a))
-			 	actToGround.add(tempAction)
-			 	
-			for ac in actToGround:
+				print("Combinacao ", i)
+				ac = subst(list(i), tempAction) #possible combinations for a given action
 				print(ac)
-				for par in ac.params:
-					print(par.value ,end='')
-				print(" ")
+			 	#actToGround.add(tempAction)
+
+
+
+		print("FINAL ", a.name, combAll)
+
+
+
+
+
+			# for i in combAll:
+			# 	print ("",i)
+			# 	tempAction = subst(list(i), deepcopy(a)) #possible combinations for a given action
+			# 	actToGround.add(tempAction)
+			# for ac in actToGround:
+			# 	print(ac)
+			# 	for par in ac.params:
+			# 		print(par.value ,end='')
+			# 	print(" ")
 
 		print ("Literals Problem > ", literals) 
 
