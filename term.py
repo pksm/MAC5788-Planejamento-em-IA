@@ -51,11 +51,11 @@ class Term(object):
         return Term(value=value, type=type)
 
     def __str__(self):
+        if self.is_constant():
+            return '{0}'.format(self._value)
         if self.is_variable() and self.is_typed():
             return '{0} - {1}'.format(self._name, self._type)
         if self.is_variable():
             return '{0}'.format(self._name)
         if self.is_constant() and self.is_typed():
             return '{0} - {1}'.format(self._value, self._type)
-        if self.is_constant():
-            return '{0}'.format(self._value)

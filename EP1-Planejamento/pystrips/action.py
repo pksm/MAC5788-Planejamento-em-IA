@@ -86,7 +86,7 @@ class Action(object):
         return self._neg_effect.copy()
 
     def __str__(self):
-        action_str  = '{0}({1})\n'.format(self._name, ', '.join(self._args))
+        action_str  = '{0}({1})\n'.format(self._name, ', '.join(self._args.value))
         action_str += '>> pre:  {0}\n'.format(', '.join(sorted(self._precond)))
         action_str += '>> eff+: {0}\n'.format(', '.join(sorted(self._pos_effect)))
         action_str += '>> eff-: {0}\n'.format(', '.join(sorted(self._neg_effect)))

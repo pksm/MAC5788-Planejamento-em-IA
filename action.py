@@ -16,11 +16,13 @@
 
 class Action(object):
 
-    def __init__(self, name, params, precond, effects):
+    def __init__(self, name, params, precond, effects, pos_effect=[], neg_effect=[]):
         self._name    = name
         self._params  = params
         self._precond = precond
         self._effects = effects
+        self._pos_effect = pos_effect
+        self._neg_effect = neg_effect
 
     @property
     def name(self):
@@ -37,9 +39,21 @@ class Action(object):
     @property
     def effects(self):
         return self._effects[:]
+    @property
+    def pos_effect(self):
+        ''' Return a list of positive effect atoms represented as strings. '''
+        return self._pos_effect.copy()
+
+    @property
+    def neg_effect(self):
+        ''' Return a list of negative effect atoms represented as strings. '''
+        return self._neg_effect.copy()
 
     def __str__(self):
+        # operator_str  = '{0}({1})\n'.format(self._name, ', '.join(map(str, self._params)))
         operator_str  = '{0}({1})\n'.format(self._name, ', '.join(map(str, self._params)))
         operator_str += '>> precond: {0}\n'.format(', '.join(map(str, self._precond)))
         operator_str += '>> effects: {0}\n'.format(', '.join(map(str, self._effects)))
+        operator_str += '>> eff+: {0}\n'.format(', '.join(sorted(self._pos_effect)))
+        operator_str += '>> eff-: {0}\n'.format(', '.join(sorted(self._neg_effect)))
         return operator_str
