@@ -14,6 +14,11 @@ import re
 from copy import deepcopy
 from itertools import product
 
+from util import Stack, Queue
+from state import State
+from node  import Node
+from action import Action
+
 
 def generate(typ,lit): #lit eh um dict (literals) --- retorna todas as subst possiveis para uma acao
 	combList = []
@@ -27,20 +32,38 @@ def generate(typ,lit): #lit eh um dict (literals) --- retorna todas as subst pos
 def subst(comb,act): 
 	pos = 0
 	instAct = deepcopy(act)
+	pos_effect = []
+	neg_effect = []
 	for valor in comb:
 		act._params[pos]._value = valor
 		instAct._params[pos]._value = valor
 		pos += 1
 	for pre in range(len(act._precond)):
 		instAct._precond[pre]._predicate = act._precond[pre]._predicate.ground(act._params)
+	for j in instAct.precond:
+		if ((j.predicate.name == '=') and (str(j.predicate.args[0]) == str(j.predicate.args[1]))):
+			return None
 	for eff in range(len(act._effects)):
 		instAct._effects[eff]._predicate = act._effects[eff]._predicate.ground(act._params)
 	for eff in instAct.effects:
 		if eff.is_positive():
 			instAct._pos_effect.append(str(eff.predicate))
+			pos_effect.append(str(eff.predicate))
 		elif eff.is_negative():
 			instAct._neg_effect.append(str(eff.predicate))
-	return instAct
+			neg_effect.append(str(eff.predicate))
+	args = [ str(param.value) for param in instAct.params ]
+	precond = [ str(l.predicate) for l in instAct._precond if l.is_positive() ]
+
+	return Action(instAct.name, args, precond, instAct.effects, pos_effect, neg_effect)
+
+def applicable(state, actions):
+	app = list()
+	for act in actions:
+		precond = act.precond
+		if state.intersect(set(precond)) == set(precond):
+			app.append(act)
+	return app
 
 
 class blindSearch(object):
@@ -51,6 +74,8 @@ class blindSearch(object):
 		self._problem = problem
 		self._search = search
 		self.operatorsPrecond = {}
+		self.all_actions = self.domain.operators
+		self.literals = self.problem.objects #dict key -> type   values -> literals
 		self.genDict()
 		#self._objects[obj.type] = self._objects.get(obj.type, [])
 		# self.domainOperators = {}
@@ -72,107 +97,116 @@ class blindSearch(object):
 		return self._search
 
 	def genDict(self):
-		all_actions = self._domain.operators
-		for a in all_actions:
+		for a in self.all_actions:
 			for p in a.precond:
 				if p.predicate.name != '=':
 					self.operatorsPrecond[a] = self.operatorsPrecond.get(a, set()) #na hora de fazer union, intersect, difference mudar para set
 					self.operatorsPrecond[a].add(re.sub(r'\([^)]*\)', '', str(p)))
-					# self.operatorsPrecond[a.name] = self.operatorsPrecond.get(a.name, set()) #na hora de fazer union, intersect, difference mudar para set
-					# self.operatorsPrecond[a.name].add(re.sub(r'\([^)]*\)', '', str(p)))
-
-	# @property
-	# def domainOperators(self):
-	# 	return self._domainOperators.copy()
 
 	def getInit(self):
-		return self.problem._init #return a set with the initial propositions
+		return self.problem.init #return a set with the initial propositions
 
 	def isGoal(self, state):
-		return ((self.problem.goal & state) == self.problem.goal) #goal test
-		#before last update: return ((self.problem._goal & state) == self.problem._goal)
+		return ((self.problem.goal & set(state)) == self.problem.goal) 
 
-	def grounding(self, actions, state): #returns list of instatiated applicable actions
-		literals = self.problem.objects #dict key -> type   values -> literals
+	def grounding(self, actions): #returns list of instatiated applicable actions
 		actToGround = set()
 		for a in actions:
 			tempAction = deepcopy(a)
-			params = deepcopy(a.params)
-			var = [i.name for i in params]
-			typ = [i.type for i in params]
-			#print ("HEYY", a.name, type(params),params[len(params)-1].name, params[len(params)-1].type, len(params), var, typ)
-			#print(self.gen_all_combinations(['block', 'girafa'],{'block' : ['d', 'b', 'a', 'c'], 'girafa' : ['mimosa', 'gigi']}))
-			combAll = generate(typ,literals)
-			#print("possible combinations for ", a.name, combAll)
-			#subst(list(combAll), deepcopy(a),var)
+			#var = [i.name for i in a.params]
+			typ = [i.type for i in a.params]
+			combAll = generate(typ, self.literals)
 			for i in combAll:
-				#print("Combinacao ", i)
-				ac = subst(list(i), tempAction) #possible combinations for a given action
-				illegalAction = False
-				for j in ac.precond:
-					if ((j.predicate.name == '=') and (j.predicate.args[0] == j.predicate.args[1])):
-						illegalAction = True
-						break
-				if (not illegalAction):
+				ac = subst(list(i), tempAction) 
+				if ac is not None:
 					actToGround.add(ac)
-		for k in actToGround:
-			print(k)
-
-
-
-		#print("FINAL ", a.name, combAll)
-			# for i in combAll:
-			# 	print ("",i)
-			# 	tempAction = subst(list(i), deepcopy(a)) #possible combinations for a given action
-			# 	actToGround.add(tempAction)
-			# for ac in actToGround:
-			# 	print(ac)
-			# 	for par in ac.params:
-			# 		print(par.value ,end='')
-			# 	print(" ")
-
-		#print ("Literals Problem > ", literals) 
-
-
+		return actToGround
 
 	def applicableActions(self,state): #esperando um state do tipo set
 		validActions = set()
-		all_actions = self.domain.operators
-		atomState = {re.sub(r'\([^)]*\)', '', str(i)) for i in self.problem.init} #sera state depois
+		atomState = {re.sub(r'\([^)]*\)', '', str(i)) for i in state} 
 		for i in self.operatorsPrecond.keys():
 			if ((self.operatorsPrecond[i] & atomState) == self.operatorsPrecond[i]):
 				validActions.add(i)
-		print ("VALID FOR > ", self.problem.init, "ACTIONS > ", validActions )
-		self.grounding(all_actions, self.problem.init)
-		#actInst = self.grounding(all_actions, self.problem.init) # self.grounding(validActions, state) in the future
-		#generate successor state for each actInst
+		return self.grounding(validActions) 
+    
+	def successor(self, state, action):
+		return State(State(set(action.pos_effect))).union(state.difference(State(set(action.neg_effect))))
 
+	def solveBreadth(self):
+			plan = []
+			num_explored = 0
+			num_generated = 0
+			opened = set()
+			naBorda = set()
+			initialNode = Node(State(self.getInit()))
+			nodesNext = Queue()
+			nodesNext.push(initialNode)
+			naBorda.add(initialNode.state)
+			goal = False
+			while not goal :
+				sNode = nodesNext.pop()
+				naBorda.remove(sNode.state)
+				opened.add(sNode.state)
+				num_explored += 1
+				actionsPossible = self.applicableActions(set(sNode.state))
+				actionsApplicable = applicable(sNode.state, actionsPossible)
+				#realOnes = applicable(sNode.state, actionsApplicable)
+				for a in actionsApplicable:					
+					stateSon = self.successor(sNode.state,a)
+					num_generated += 1
+					if stateSon in opened or stateSon in naBorda:
+						continue 
+					nodeSon = Node(stateSon,a,sNode,sNode.g + 1)
+					if self.isGoal(stateSon):
+						goal = True
+						sNode = nodeSon
+						break
+					nodesNext.push(nodeSon)
+					naBorda.add(stateSon)
+				if nodesNext.isEmpty():
+					print ('Problem does not have a solution')
+					return None
+			plan= sNode.path()
+			#print(plan)
+			return (plan,num_explored,num_generated)
 
-
-		# atomState = re.sub(r'\([^)]*\)', '', str(self.problem.init))
-		#print(atomState, type(self.problem.init), self.problem.init)
-		#types = list(literals.keys()) #pode ser alterado para set 
-		#types2 = list(literals.items())
-		#precondAct = []
-		'''
-		Ideia:
-			criar dois dicts: (1) dict predicate (2) dict equality (pode ser um set com o nome das actions que contenham tipo equality na precond)
-			(1) [action.name] = action.precond.predicate.name
-
-			se tem equality nas preconds, entao deve ter uma flag para detectar isso e testar os literais
-
-			OLD:
-			- pegar toda letra que sucede ? em Action.params e adicionar a um set para nao ter duplicadas
-			- para cada letra gerar um novo set com o mesmo index e atribuir 
-			------------------------------------
-			NOW: a ideia eh q dado um set de atomos, eh possivel verificar a aplicabilidade dos operadores disponiveis sem instanciar, olhar num 
-			dicionario talvez...chamar funcao q cria esse dicionario assim que entra no __init___
-				[action.name] = [action.precond (sem os predicados de igualdade)]	DICT referente a DOMAIN
-
-		'''
-		# for a in all_actions:
-		# 	if ((set(a.precond) & state) == set(a.precond)):
-		# 		validActions.append(a.name)
-
-		return 
+	def solveDepth(self):
+			plan = []
+			num_explored = 0
+			num_generated = 0
+			opened = set()
+			naBorda = set()
+			initialNode = Node(State(self.getInit()))
+			nodesNext = Queue()
+			nodesNext.push(initialNode)
+			naBorda.add(initialNode.state)
+			goal = False
+			while not goal :
+				sNode = nodesNext.pop()
+				naBorda.remove(sNode.state)
+				opened.add(sNode.state)
+				num_explored += 1
+				actionsPossible = self.applicableActions(set(sNode.state))
+				actionsApplicable = applicable(sNode.state, actionsPossible)
+				#realOnes = applicable(sNode.state, actionsApplicable)
+				for a in actionsApplicable:					
+					stateSon = self.successor(sNode.state,a)
+					num_generated += 1
+					if stateSon in opened or stateSon in naBorda:
+						continue 
+					nodeSon = Node(stateSon,a,sNode,sNode.g + 1)
+					if self.isGoal(stateSon):
+						goal = True
+						sNode = nodeSon
+						break
+					nodesNext.push(nodeSon)
+					naBorda.add(stateSon)
+				if nodesNext.isEmpty():
+					print ('Problem does not have a solution')
+					return None
+			plan= sNode.path()
+			#print(plan)
+			return (plan,num_explored,num_generated)
+		 
 

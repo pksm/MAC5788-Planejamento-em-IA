@@ -53,7 +53,7 @@ class ProgressionPlanning(object):
         nodesNext = Stack()
         nodesNext.push(initialNode)
         goal = False
-        while not goal and not nodesNext.isEmpty():
+        while not goal:
             sNode = nodesNext.pop()
             opened.add(sNode.state)
             num_explored += 1
@@ -72,7 +72,7 @@ class ProgressionPlanning(object):
                 print ('Problem does not have a solution')
                 return None
         plan = sNode.path()
-        print(plan)
+        #print(plan)
         return (plan,num_explored,num_generated)
 
     def solveBreadth(self):
@@ -86,14 +86,11 @@ class ProgressionPlanning(object):
         nodesNext.push(initialNode)
         naBorda.append(initialNode.state)
         goal = False
-        while not goal and not nodesNext.isEmpty():
+        while not goal:
             sNode = nodesNext.pop()
             naBorda.remove(sNode.state)
             opened.add(sNode.state)
             num_explored += 1
-            if self.goal_test(sNode.state):
-                goal = True
-                break
             actionsApplicable = self.applicable(sNode.state)
             for a in actionsApplicable:
                 stateSon = self.successor(sNode.state,a)
@@ -101,9 +98,13 @@ class ProgressionPlanning(object):
                 if stateSon in opened and stateSon not in naBorda:
                     continue
                 nodeSon = Node(stateSon,a,sNode,sNode.g + 1)
+                if self.goal_test(stateSon):
+                	goal = True
+                	sNode = nodeSon
+                	break
                 nodesNext.push(nodeSon)
                 naBorda.append(stateSon)
-            if nodesNext.isEmpty():
+            if not goal and nodesNext.isEmpty():
                 print ('Problem does not have a solution')
                 return None
         plan = sNode.path()

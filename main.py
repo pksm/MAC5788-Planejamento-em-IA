@@ -37,9 +37,4 @@ if __name__ == '__main__':
     domain  = PDDLParser.parse(args.domain)
     problem = PDDLParser.parse(args.problem)
     teste = blindSearch(domain,problem,'none')
-
-    print(domain)
-    print(problem)
-    print (teste.getInit()) 
-    print (teste.isGoal({'on(c, b)', 'on(d, c)', 'on(b, a)'}))
-    print (teste.applicableActions({'on(c, b)', 'on(d, c)', 'on(b, a)'}))
+    print(teste.solveBreadth())

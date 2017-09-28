@@ -51,6 +51,7 @@ class Node(object):
         actions = []
         node = self
         while node._parent is not None:
-            actions = [node._action] + actions
+            better  = '{0}({1})'.format(node._action.name, ', '.join(map(str, node._action.params)))
+            actions = [better] + actions
             node = node._parent
         return actions
