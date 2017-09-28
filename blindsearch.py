@@ -32,6 +32,7 @@ def generate(typ,lit): #lit eh um dict (literals) --- retorna todas as subst pos
 def subst(comb,act): 
 	pos = 0
 	instAct = deepcopy(act)
+	#instAct = Action(act.name, act.params, act.precond, act.effects)
 	pos_effect = []
 	neg_effect = []
 	for valor in comb:
@@ -40,9 +41,6 @@ def subst(comb,act):
 		pos += 1
 	for pre in range(len(act._precond)):
 		instAct._precond[pre]._predicate = act._precond[pre]._predicate.ground(act._params)
-	for j in instAct.precond:
-		if ((j.predicate.name == '=') and (str(j.predicate.args[0]) == str(j.predicate.args[1]))):
-			return None
 	for eff in range(len(act._effects)):
 		instAct._effects[eff]._predicate = act._effects[eff]._predicate.ground(act._params)
 	for eff in instAct.effects:
@@ -52,6 +50,9 @@ def subst(comb,act):
 		elif eff.is_negative():
 			instAct._neg_effect.append(str(eff.predicate))
 			neg_effect.append(str(eff.predicate))
+	for j in instAct.precond:
+		if ((j.predicate.name == '=') and (str(j.predicate.args[0]) == str(j.predicate.args[1]))):
+			return None
 	args = [ str(param.value) for param in instAct.params ]
 	precond = [ str(l.predicate) for l in instAct._precond if l.is_positive() ]
 
@@ -110,16 +111,16 @@ class blindSearch(object):
 		return ((self.problem.goal & set(state)) == self.problem.goal) 
 
 	def grounding(self, actions): #returns list of instatiated applicable actions
-		actToGround = set()
+		actToGround = []
 		for a in actions:
-			tempAction = deepcopy(a)
+			#tempAction = deepcopy(a)
 			#var = [i.name for i in a.params]
 			typ = [i.type for i in a.params]
 			combAll = generate(typ, self.literals)
 			for i in combAll:
-				ac = subst(list(i), tempAction) 
+				ac = subst(list(i), a) 
 				if ac is not None:
-					actToGround.add(ac)
+					actToGround.append(ac)
 		return actToGround
 
 	def applicableActions(self,state): #esperando um state do tipo set
